@@ -20,11 +20,10 @@ namespace MyTools
             // Get all categories in the document
             Categories categories = doc.Settings.Categories;
 
-            // Filter to get only model categories (you can modify this filter)
+            // Filter to get only model categories
             List<Category> modelCategories = new List<Category>();
             foreach (Category cat in categories)
             {
-                // Only include categories that allow bound parameters (model categories)
                 if (cat.AllowsBoundParameters && cat.CategoryType == CategoryType.Model)
                 {
                     modelCategories.Add(cat);
@@ -34,7 +33,7 @@ namespace MyTools
             // Sort categories by name
             modelCategories = modelCategories.OrderBy(c => c.Name).ToList();
 
-            // Convert to CategoryItem list for the WPF window
+            // Convert to CategoryItem list
             List<CategoryItem> categoryItems = modelCategories
                 .Select(c => new CategoryItem
                 {
@@ -44,28 +43,45 @@ namespace MyTools
                 })
                 .ToList();
 
+            // Get all views in the document
+            FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+            List<View> allViews = viewCollector
+                .OfClass(typeof(View))
+                .Cast<View>()
+                .Where(v => !v.IsTemplate && v.CanBePrinted)
+                .OrderBy(v => v.Name)
+                .ToList();
+
+            // Convert to ViewItem list
+            List<ViewItem> viewItems = allViews
+                .Select(v => new ViewItem
+                {
+                    Name = v.Name,
+                    ViewId = v.Id
+                })
+                .ToList();
+
             // Show the category selection window
-            CategorySelectionWindow window = new CategorySelectionWindow(categoryItems);
+            CategorySelectionWindow window = new CategorySelectionWindow(categoryItems, viewItems);
 
             // Set Revit as the owner window
             System.Windows.Interop.WindowInteropHelper helper =
                 new System.Windows.Interop.WindowInteropHelper(window);
             helper.Owner = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
 
-            if (window.ShowDialog() == true)
+            if (window.ShowDialog() == true && window.CreateViewClicked)
             {
-                // Get selected categories
-                List<CategoryItem> selected = window.SelectedCategories;
+                List<CategoryItem> selectedCategories = window.SelectedCategories;
+                ViewItem selectedView = window.SelectedView;
 
-                if (selected.Count > 0)
+                if (selectedCategories.Count > 0 && selectedView != null)
                 {
-                    // TODO: Add your logic here for what to do with selected categories
-                    string selectedNames = string.Join("\n", selected.Select(c => c.Name));
-                    TaskDialog.Show("Selected Categories", $"You selected {selected.Count} categories:\n\n{selectedNames}");
-                }
-                else
-                {
-                    TaskDialog.Show("Selection", "No categories selected.");
+                    // TODO: Add your logic here to create the view
+                    string categoryNames = string.Join(", ", selectedCategories.Select(c => c.Name));
+                    TaskDialog.Show("Create View",
+                        $"Creating view based on:\n\n" +
+                        $"View: {selectedView.Name}\n\n" +
+                        $"Categories ({selectedCategories.Count}):\n{categoryNames}");
                 }
             }
 
