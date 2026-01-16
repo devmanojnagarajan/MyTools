@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+	<AddIn Type="Application">
+		<Name>MyTools</Name>
+		<FullClassName>MyTools.IsolatedView</FullClassName>
+		<Text>MyTools</Text>
+		<Description>Places the Group at Particular Point</Description>
+		<VisibilityMode>AlwaysVisible</VisibilityMode>
+		<Assembly>MyTools.dll</Assembly>
+		<AddInId>D1AC5AD2-F777-4BC4-921A-215B9575E988</AddInId>
+		<VendorId>devmanojnagarajan</VendorId>
+		<VendorDescription>manojnagarajan27@gmail.com</VendorDescription>
+	</AddIn>
+</RevitAddIns>
