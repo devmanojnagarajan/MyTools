@@ -8,16 +8,16 @@
     <LangVersion>latest</LangVersion>
     <UseWPF>true</UseWPF>
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Program Files\Autodesk\Revit 2024\Revit.exe</StartProgram>
+    <StartProgram>C:\Program Files\Autodesk\Revit 2023\Revit.exe</StartProgram>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="RevitAPI">
-      <HintPath>C:\Program Files\Autodesk\Revit 2024\RevitAPI.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\Revit 2023\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPIUI">
-      <HintPath>C:\Program Files\Autodesk\Revit 2024\RevitAPIUI.dll</HintPath>
+      <HintPath>C:\Program Files\Autodesk\Revit 2023\RevitAPIUI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -29,8 +29,8 @@
   </ItemGroup>
 
   <Target Name="CopyToRevitAddins" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProgramData)\Autodesk\Revit\Addins\2024\" />
-    <Copy SourceFiles="$(ProjectDir)IsolatedView.addin" DestinationFolder="$(ProgramData)\Autodesk\Revit\Addins\2024\" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProgramData)\Autodesk\Revit\Addins\2023\" />
+    <Copy SourceFiles="$(ProjectDir)IsolatedView.addin" DestinationFolder="$(ProgramData)\Autodesk\Revit\Addins\2023\" />
   </Target>
 
 </Project>
