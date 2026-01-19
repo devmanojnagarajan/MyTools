@@ -74,15 +74,12 @@ namespace MyTools
                 List<CategoryItem> selectedCategories = window.SelectedCategories;
                 ViewItem selectedView = window.SelectedView;
 
-                if (selectedCategories.Count > 0 && selectedView != null)
-                {
-                    // TODO: Add your logic here to create the view
-                    string categoryNames = string.Join(", ", selectedCategories.Select(c => c.Name));
-                    TaskDialog.Show("Create View",
-                        $"Creating view based on:\n\n" +
-                        $"View: {selectedView.Name}\n\n" +
-                        $"Categories ({selectedCategories.Count}):\n{categoryNames}");
-                }
+                // Store selections using SelectionStorage
+                SelectionStorage.SetSelectedCategories(selectedCategories);
+                SelectionStorage.SetSelectedView(selectedView);
+
+                // Print selections using SelectionPrinter
+                SelectionPrinter.PrintSelections();
             }
 
             return Result.Succeeded;
