@@ -17,6 +17,27 @@ namespace MyTools
             UIDocument uidoc = uiapp.ActiveUIDocument;
             Document doc = uidoc.Document;
 
+            // GET THE CURRENT ACTIVE VIEW
+            View currentActiveView = uidoc.ActiveView;
+
+            // CHECK IF CURRENT VIEW IS A FLOOR PLAN
+            if (currentActiveView.ViewType != ViewType.FloorPlan)
+            {
+                TaskDialog.Show("Invalid View Type",
+                    "This command must be run from a Floor Plan view.\n\n" +
+                    $"Current view: {currentActiveView.Name}\n" +
+                    $"View type: {currentActiveView.ViewType}\n\n" +
+                    "Please switch to a Floor Plan view and try again.");
+                return Result.Cancelled;
+            }
+
+            // Create ViewItem for current active view
+            ViewItem currentViewItem = new ViewItem
+            {
+                Name = currentActiveView.Name,
+                ViewId = currentActiveView.Id
+            };
+
             // Get all categories in the document
             Categories categories = doc.Settings.Categories;
 
@@ -43,12 +64,14 @@ namespace MyTools
                 })
                 .ToList();
 
-            // Get all views in the document
+            // Get all views in the document (only floor plans for selection)
             FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
             List<View> allViews = viewCollector
                 .OfClass(typeof(View))
                 .Cast<View>()
-                .Where(v => !v.IsTemplate && v.CanBePrinted)
+                .Where(v => !v.IsTemplate
+                    && v.CanBePrinted
+                    && v.ViewType == ViewType.FloorPlan) // Only floor plans
                 .OrderBy(v => v.Name)
                 .ToList();
 
@@ -61,8 +84,11 @@ namespace MyTools
                 })
                 .ToList();
 
-            // Show the category selection window
-            CategorySelectionWindow window = new CategorySelectionWindow(categoryItems, viewItems);
+            // Show the category selection window with current active view
+            CategorySelectionWindow window = new CategorySelectionWindow(
+                categoryItems,
+                viewItems,
+                currentViewItem); // Pass the current active view
 
             // Set Revit as the owner window
             System.Windows.Interop.WindowInteropHelper helper =
@@ -75,8 +101,8 @@ namespace MyTools
                 ViewItem selectedView = window.SelectedView;
 
                 // Store selections using SelectionStorage
-                SelectionStorage.SetSelectedCategories(selectedCategories);
-                SelectionStorage.SetSelectedView(selectedView);
+                CategoriesSelected.SetSelectedCategories(selectedCategories);
+                ViewSelected.SetSelectedView(selectedView);
 
                 // Print selections using SelectionPrinter
                 SelectionPrinter.PrintSelections();

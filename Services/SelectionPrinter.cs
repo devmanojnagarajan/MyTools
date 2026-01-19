@@ -8,8 +8,8 @@ namespace MyTools
         // Print current selections
         public static void PrintSelections()
         {
-            var selectedCategories = SelectionStorage.GetSelectedCategories();
-            var selectedView = SelectionStorage.GetSelectedView();
+            var selectedCategories = CategoriesSelected.GetSelectedCategories();
+            var selectedView = ViewSelected.GetSelectedView();
 
             if (selectedCategories.Count > 0 && selectedView != null)
             {
@@ -29,7 +29,7 @@ namespace MyTools
         // Print only categories
         public static void PrintCategories()
         {
-            var selectedCategories = SelectionStorage.GetSelectedCategories();
+            var selectedCategories = CategoriesSelected.GetSelectedCategories();
 
             if (selectedCategories.Count > 0)
             {
@@ -46,7 +46,7 @@ namespace MyTools
         // Print only view
         public static void PrintView()
         {
-            var selectedView = SelectionStorage.GetSelectedView();
+            var selectedView = ViewSelected.GetSelectedView();
 
             if (selectedView != null)
             {

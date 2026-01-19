@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace MyTools
 {
@@ -13,14 +14,20 @@ namespace MyTools
         public ObservableCollection<ViewItem> AllViews { get; set; }
         public List<CategoryItem> SelectedCategories { get; private set; }
         public ViewItem SelectedView { get; private set; }
+        public ViewItem CurrentActiveView { get; private set; } // Store current active view
         public bool CreateViewClicked { get; private set; }
 
-        public CategorySelectionWindow(List<CategoryItem> categories, List<ViewItem> views)
+        // MODIFIED CONSTRUCTOR: Accept current active view
+        public CategorySelectionWindow(
+            List<CategoryItem> categories,
+            List<ViewItem> views,
+            ViewItem currentActiveView)
         {
             InitializeComponent();
 
             AllCategories = new ObservableCollection<CategoryItem>(categories);
             AllViews = new ObservableCollection<ViewItem>(views);
+            CurrentActiveView = currentActiveView; // Store the current active view
 
             CategoryListBox.ItemsSource = AllCategories;
             ViewComboBox.ItemsSource = AllViews;
@@ -30,6 +37,7 @@ namespace MyTools
             CreateViewClicked = false;
 
             UpdateCreateViewButton();
+            UpdateCurrentViewDisplay(); // Display the current active view
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -90,6 +98,24 @@ namespace MyTools
             bool hasSelectedView = ViewComboBox.SelectedItem != null;
 
             CreateViewButton.IsEnabled = hasSelectedCategories && hasSelectedView;
+        }
+
+        // MODIFIED METHOD: Display the frozen current active view
+        private void UpdateCurrentViewDisplay()
+        {
+            if (CurrentActiveView != null)
+            {
+                CurrentViewTextBlock.Text = CurrentActiveView.Name;
+                CurrentViewTextBlock.FontStyle = FontStyles.Normal;
+                CurrentViewTextBlock.Foreground = Brushes.Black;
+                CurrentViewTextBlock.FontWeight = FontWeights.SemiBold; // Make it bold to show it's fixed
+            }
+            else
+            {
+                CurrentViewTextBlock.Text = "No active view";
+                CurrentViewTextBlock.FontStyle = FontStyles.Italic;
+                CurrentViewTextBlock.Foreground = Brushes.Gray;
+            }
         }
 
         private void CreateView_Click(object sender, RoutedEventArgs e)
