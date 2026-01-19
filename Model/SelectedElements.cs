@@ -4,19 +4,33 @@ using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;  
+using System.Text;
 using System.Threading.Tasks;
 
 namespace MyTools
 {
-    [Transaction(TransactionMode.Manual)]
-    
-    public class SelectElements : IExternalCommand
+       
+    public class ElementsSelect
     {
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+        public static List<Element> GetModelElementsInView(Document doc, ViewItem currentView)
         {
-            TaskDialog.Show("MyTools", "Elements Isolated");
-            return Result.Succeeded;
+            
+
+            var collector = new FilteredElementCollector(doc, currentView.ViewId)
+                .WhereElementIsNotElementType()
+                .ToElements();
+
+            List<Element> allModelElementsInView = collector.
+                .WhereElementIsNotElementType()
+                .WhereElementIsViewIndependent()
+                .Where(e => e.Category != null && e.Category.CategoryType == CategoryType.Model)
+                .ToList();
+                
+
+            return allModelElementsInView;
+
         }
+
+
     }
 }

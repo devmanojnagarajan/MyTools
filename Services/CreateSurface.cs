@@ -9,7 +9,6 @@ namespace MyTools
 {
     public class CreateVolume
     {
-
         public static Solid SolidFromFilledRegion(FilledRegion filledRegion, double extrudeDistance)
         {
             IList<CurveLoop> currentLoop = filledRegion.GetBoundaries();
@@ -21,7 +20,7 @@ namespace MyTools
             }
             */
 
-            Plane regionPlane = currentLoop[0].GetPlane():
+            Plane regionPlane = currentLoop[0].GetPlane();
             XYZ normal = regionPlane.Normal;
 
             Transform moveBack = Transform.CreateTranslation(normal.Multiply(-extrudeDistance));
