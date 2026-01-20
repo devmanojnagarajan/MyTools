@@ -97,15 +97,32 @@ namespace MyTools
 
             if (window.ShowDialog() == true && window.CreateViewClicked)
             {
+                // 1. Get the User Selection from the Window
                 List<CategoryItem> selectedCategories = window.SelectedCategories;
-                ViewItem selectedView = window.SelectedView;
+                ViewItem selectedTemplateView = window.SelectedView;
 
-                // Store selections using SelectionStorage
-                CategoriesSelected.SetSelectedCategories(selectedCategories);
-                ViewSelected.SetSelectedView(selectedView);
+                if (selectedTemplateView == null)
+                {
+                    TaskDialog.Show("Error", "Please select a 3D View to use as a template.");
+                    return Result.Failed;
+                }
 
-                // Print selections using SelectionPrinter
-                SelectionPrinter.PrintSelections();
+                // 2. Convert UI Items back to Revit IDs
+                ElementId templateId = selectedTemplateView.ViewId;
+
+                List<ElementId> categoryIdsToProcess = selectedCategories
+                    .Where(c => c.IsSelected)
+                    .Select(c => c.CategoryId)
+                    .ToList();
+
+                if (categoryIdsToProcess.Count == 0)
+                {
+                    TaskDialog.Show("Warning", "No categories were selected. Process cancelled.");
+                    return Result.Cancelled;
+                }
+
+                // 3. CALL THE MAIN FUNCTION TO PROCESS EVERYTHING
+                ViewGenerationService.GenerateViews(doc, currentActiveView, templateId, categoryIdsToProcess);
             }
 
             return Result.Succeeded;

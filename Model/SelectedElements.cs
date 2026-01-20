@@ -20,12 +20,13 @@ namespace MyTools
                 .WhereElementIsNotElementType()
                 .ToElements();
 
-            List<Element> allModelElementsInView = collector.
-                .WhereElementIsNotElementType()
-                .WhereElementIsViewIndependent()
+            List<Element> allModelElementsInView = new FilteredElementCollector(doc, currentView.ViewId)
+                .WhereElementIsNotElementType()    // Filter 1
+                .WhereElementIsViewIndependent()   // Filter 2
+                                                   // Generic LINQ Filter (for Categories)
                 .Where(e => e.Category != null && e.Category.CategoryType == CategoryType.Model)
                 .ToList();
-                
+
 
             return allModelElementsInView;
 

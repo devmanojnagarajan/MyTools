@@ -13,9 +13,13 @@ namespace MyTools
         {
             // Create a custom ribbon tab
             string tabName = "MyTools";
-            application.CreateRibbonTab(tabName);
+            try
+            {
+                application.CreateRibbonTab(tabName);
+            }
+            catch { /* Tab already exists, just ignore */ }
 
-            // Create a ribbon panel
+            // 2. Create the panel on that tab
             RibbonPanel ribbonPanel = application.CreateRibbonPanel(tabName, "Selection Tools");
 
             // Get the assembly path
