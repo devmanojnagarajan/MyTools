@@ -1,7 +1,7 @@
 ﻿using Autodesk.Revit.DB;
 using System.Collections.Generic;
 
-namespace MyTools
+namespace MyTools.Model
 {
     public static class CategoriesSelected
     {

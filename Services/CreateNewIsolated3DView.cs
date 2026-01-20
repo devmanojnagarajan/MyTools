@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyTools
+namespace MyTools.Services
 {
     public class CreateNewIsolated3DView
     {

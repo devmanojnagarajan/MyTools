@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace MyTools
+namespace MyTools.Services
 {
     public class ViewNameFromString
     {
-        public string TitleText(string input)
+        public static string TitleText(string input)
         {
             if (string.IsNullOrEmpty(input)) return string.Empty;
 

@@ -2,7 +2,7 @@
 using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Linq;
-using MyTools.Utilities; // Assuming StringUtils is here
+using MyTools; // Assuming StringUtils is here
 
 namespace MyTools.Services
 {
@@ -11,7 +11,7 @@ namespace MyTools.Services
         public static void GenerateViews(Document doc, View activePlanView, ElementId templateViewId, List<ElementId> selectedCategoryIds)
         {
             // 1. Get the Template 3D View selected by the user
-            View3D templateView = doc.GetElement(templateViewId) as View3D;
+            View3D? templateView = doc.GetElement(templateViewId) as View3D;
             if (templateView == null)
             {
                 TaskDialog.Show("Error", "The selected view is not a valid 3D View.");
@@ -49,7 +49,7 @@ namespace MyTools.Services
                 foreach (FilledRegion region in regions)
                 {
                     // A. Create Projection Face
-                    Face regionFace = CreateSurface.FaceFromFilledRegion(region, 0);
+                    Face regionFace = CreateSurface.GetFaceFromFilledRegion(region, 0);
                     if (regionFace == null) continue;
 
                     // B. Find Associated TextNote
@@ -58,7 +58,7 @@ namespace MyTools.Services
 
                     // C. Slice Name from Quotes
                     // Assuming you have this method in your StringUtils/ViewNameFromString class
-                    string viewName = ViewNameFromString.SliceQuotedText(labelNote.Text);
+                    string viewName = ViewNameFromString.TitleText(labelNote.Text);
                     if (string.IsNullOrEmpty(viewName)) continue;
 
                     // D. Check Clashes using your Face Projection Logic

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyTools
+namespace MyTools.Services
 {
     [Transaction(TransactionMode.Manual)]
     public class SelectFilledRegion : IExternalCommand

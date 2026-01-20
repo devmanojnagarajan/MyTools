@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MyTools
+namespace MyTools.Services
 {
     public class CreateSurface
     {

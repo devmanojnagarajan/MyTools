@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyTools
+namespace MyTools.Services
 {
     public class TextNoteClash
     {

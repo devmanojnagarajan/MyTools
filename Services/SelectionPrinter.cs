@@ -1,7 +1,7 @@
 ﻿using Autodesk.Revit.UI;
 using System.Linq;
 
-namespace MyTools
+namespace MyTools.Services
 {
     public static class SelectionPrinter
     {
