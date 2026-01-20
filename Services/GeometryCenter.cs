@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace MyTools.Services
 {
-    public class GeometryCenterService
+    public class GeometryCenter
     {
-        public static XYZ GetTrueGeometryCenter(Element element)
+        public static XYZ GetGeometryCenter(Element element)
         {
             // Use Medium/Fine to ensure we get solids, but ignore non-visible junk
             Options opt = new Options
