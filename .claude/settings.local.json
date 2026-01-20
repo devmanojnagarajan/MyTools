@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\MSBuild\\\\Current\\\\Bin\\\\amd64\\\\MSBuild.exe\" \"C:\\\\Users\\\\Manoj\\\\source\\\\repos\\\\devmanojnagarajan\\\\MyTools\\\\MyTools.csproj\" -restore -t:Build -p:Configuration=Debug)"
+    ]
+  }
+}

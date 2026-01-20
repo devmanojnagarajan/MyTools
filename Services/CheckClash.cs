@@ -1,6 +1,6 @@
 ﻿using Autodesk.Revit.DB;
-using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using MyTools.Model;
 
 namespace MyTools.Services
@@ -9,28 +9,38 @@ namespace MyTools.Services
     {
         public static List<Element> getClashingElements(Face targetFace, List<Element> elementsInView)
         {
+            Debug.WriteLine($"    [CheckClash] getClashingElements START - checking {elementsInView.Count} elements");
+
             List<Element> clashingList = new List<Element>();
 
-            if (targetFace == null) return clashingList;
+            if (targetFace == null)
+            {
+                Debug.WriteLine("    [CheckClash] ERROR: targetFace is null, returning empty list");
+                return clashingList;
+            }
+
+            int processedCount = 0;
+            int nullCenterCount = 0;
 
             foreach (Element el in elementsInView)
             {
-                // 1. Get the accurate Geometry Center (Centroid)
+                processedCount++;
                 XYZ geoCenter = GeometryCenter.GetGeometryCenter(el);
 
-                if (geoCenter != null)
+                if (geoCenter == null)
                 {
-                    // 2. Project the center point onto the single surface/face
-                    IntersectionResult result = targetFace.Project(geoCenter);
+                    nullCenterCount++;
+                    continue;
+                }
 
-                    // 3. If result is not null, a projection was mathematically possible
-                    // We check Distance to ensure it is "on" the surface within a tolerance
-                    if (result != null && result.Distance < 0.001)
-                    {
-                        clashingList.Add(el);
-                    }
+                if (FaceProjectionHelper.IsPointOnFace(targetFace, geoCenter))
+                {
+                    clashingList.Add(el);
+                    Debug.WriteLine($"    [CheckClash] CLASH: Element {el.Id} ({el.Category?.Name ?? "No Category"}) at ({geoCenter.X:F2}, {geoCenter.Y:F2}, {geoCenter.Z:F2})");
                 }
             }
+
+            Debug.WriteLine($"    [CheckClash] getClashingElements END - Processed: {processedCount}, NullCenters: {nullCenterCount}, Clashes: {clashingList.Count}");
             return clashingList;
         }
     }

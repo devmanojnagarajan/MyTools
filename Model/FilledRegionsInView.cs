@@ -1,33 +1,21 @@
-﻿using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using System;
+﻿using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MyTools.Services;
 
 namespace MyTools.Model
 {
-    public class FilledRegionsInView 
-
+    public class FilledRegionsInView
     {
         private static List<FilledRegion> filledRegionsInView = new List<FilledRegion>();
 
-        //get all the filled region in the view
-        public static void selectAllFilledRegionsFromView(View currentView, Document doc)
+        public static void SelectAllFilledRegionsFromView(View currentView, Document doc)
         {
             filledRegionsInView.Clear();
 
-            FilteredElementCollector collector = new FilteredElementCollector(doc, currentView.Id);
-
-            filledRegionsInView = collector
+            filledRegionsInView = new FilteredElementCollector(doc, currentView.Id)
                 .OfClass(typeof(FilledRegion))
                 .Cast<FilledRegion>()
                 .ToList();
-
-
         }
 
         public static List<FilledRegion> GetFilledRegions()
@@ -35,19 +23,14 @@ namespace MyTools.Model
             return filledRegionsInView;
         }
 
-        public static int getFilledRegionsCount()
+        public static int GetFilledRegionsCount()
         {
             return filledRegionsInView.Count;
         }
 
-        public static void clearFilledRegionsList()
+        public static void ClearFilledRegionsList()
         {
             filledRegionsInView.Clear();
         }
-
-
-
-
     }
-    
 }
