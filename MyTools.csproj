@@ -31,6 +31,9 @@
     <Content Include="Resources\Icons\isolatelogo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Icons\isolatelogo32.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -51,7 +54,7 @@
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="SET &quot;RevitFolder=%25AppData%25\Autodesk\Revit\Addins\2024&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /F &quot;$(TargetDir)*.dll&quot; &quot;%25RevitFolder%25\&quot;&#xA;xcopy /Y /F &quot;$(TargetDir)*.pdb&quot; &quot;%25RevitFolder%25\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /F &quot;$(ProjectDir)*.addin&quot; &quot;%25RevitFolder%25\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /I /E &quot;$(TargetDir)Resources&quot; &quot;%25RevitFolder%25\Resources&quot;" />
+    <Exec Command="SET &quot;RevitFolder=%25AppData%25\Autodesk\Revit\Addins\2024&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /F &quot;$(TargetDir)*.dll&quot; &quot;%25RevitFolder%25\&quot;&#xA;xcopy /Y /F &quot;$(TargetDir)*.pdb&quot; &quot;%25RevitFolder%25\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /F &quot;$(ProjectDir)*.addin&quot; &quot;%25RevitFolder%25\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /I /E &quot;$(TargetDir)Resources&quot; &quot;%25RevitFolder%25\Resources&quot;&#xD;&#xA;exit /b 0" />
   </Target>
 
 </Project>
