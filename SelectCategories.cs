@@ -66,14 +66,14 @@ namespace MyTools
                 })
                 .ToList();
 
-            // Get all views in the document (only floor plans for selection)
+            // Get all views in the document (only 3D Views for selection)
             FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
             List<View> allViews = viewCollector
                 .OfClass(typeof(View))
                 .Cast<View>()
                 .Where(v => !v.IsTemplate
                     && v.CanBePrinted
-                    && v.ViewType == ViewType.FloorPlan) // Only floor plans
+                    && v.ViewType == ViewType.ThreeD) // Only 3D Views
                 .OrderBy(v => v.Name)
                 .ToList();
 
