@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
@@ -9,12 +9,9 @@
     <UseWPF>true</UseWPF>
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files\Autodesk\Revit 2024\Revit.exe</StartProgram>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
+    <!-- Revit Addin Output Folder - SINGLE SOURCE OF TRUTH -->
+    <RevitAddinFolder>C:\Users\Manoj\AppData\Roaming\Autodesk\Revit\Addins\2024</RevitAddinFolder>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Resources\Icons\isolatelogo.png" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="RevitAPI">
@@ -28,33 +25,41 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\Icons\isolatelogo.png">
+    <Content Include="Resources\Icons\*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Icons\isolatelogo32.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="IsolatedView.cs">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="IsolatedView.addin">
+    <None Include="IsolatedView.addin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
-  <Target Name="CopyToRevitAddins" AfterTargets="Build">
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProgramData)\Autodesk\Revit\Addins\2024\" />
-    <Copy SourceFiles="$(ProjectDir)IsolatedView.addin" DestinationFolder="$(ProgramData)\Autodesk\Revit\Addins\2024\" />
-  </Target>
+  <!-- Single PostBuild Target: Copies ALL files to Revit Addins folder -->
+  <Target Name="DeployToRevit" AfterTargets="Build">
+    <Message Importance="High" Text="Deploying to Revit Addins folder: $(RevitAddinFolder)" />
 
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="SET &quot;RevitFolder=%25AppData%25\Autodesk\Revit\Addins\2024&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /F &quot;$(TargetDir)*.dll&quot; &quot;%25RevitFolder%25\&quot;&#xA;xcopy /Y /F &quot;$(TargetDir)*.pdb&quot; &quot;%25RevitFolder%25\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /F &quot;$(ProjectDir)*.addin&quot; &quot;%25RevitFolder%25\&quot;&#xD;&#xA;&#xD;&#xA;xcopy /Y /I /E &quot;$(TargetDir)Resources&quot; &quot;%25RevitFolder%25\Resources&quot;&#xD;&#xA;exit /b 0" />
+    <!-- Create destination folder if it doesn't exist -->
+    <MakeDir Directories="$(RevitAddinFolder)" Condition="!Exists('$(RevitAddinFolder)')" />
+    <MakeDir Directories="$(RevitAddinFolder)\Resources\Icons" Condition="!Exists('$(RevitAddinFolder)\Resources\Icons')" />
+
+    <!-- Copy DLL -->
+    <Copy SourceFiles="$(TargetDir)MyTools.dll" DestinationFolder="$(RevitAddinFolder)" />
+    <Message Importance="High" Text="Copied: MyTools.dll" />
+
+    <!-- Copy PDB for debugging -->
+    <Copy SourceFiles="$(TargetDir)MyTools.pdb" DestinationFolder="$(RevitAddinFolder)" Condition="Exists('$(TargetDir)MyTools.pdb')" />
+
+    <!-- Copy .addin manifest -->
+    <Copy SourceFiles="$(ProjectDir)IsolatedView.addin" DestinationFolder="$(RevitAddinFolder)" />
+    <Message Importance="High" Text="Copied: IsolatedView.addin" />
+
+    <!-- Copy Resources -->
+    <ItemGroup>
+      <ResourceFilesToCopy Include="$(TargetDir)Resources\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ResourceFilesToCopy)" DestinationFolder="$(RevitAddinFolder)\Resources\%(RecursiveDir)" />
+    <Message Importance="High" Text="Copied: Resources folder" />
+
+    <Message Importance="High" Text="=== Deployment Complete ===" />
   </Target>
 
 </Project>

@@ -1,5 +1,4 @@
-﻿using Autodesk.Revit.DB;
-using System;
+using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -7,47 +6,44 @@ namespace MyTools.Services
 {
     public class CreateSurface
     {
-        public static Face GetFaceFromFilledRegion(FilledRegion filledRegion, double offsetDistance)
+        /// <summary>
+        /// Gets the boundary curves of a FilledRegion as a list of CurveLoops
+        /// </summary>
+        public static IList<CurveLoop> GetBoundaryLoops(FilledRegion filledRegion)
         {
-            Debug.WriteLine($"    [CreateSurface] GetFaceFromFilledRegion START - offsetDistance: {offsetDistance}");
+            Debug.WriteLine($"    [CreateSurface] GetBoundaryLoops START");
 
-            IList<CurveLoop> currentLoop = filledRegion.GetBoundaries();
-            if (currentLoop.Count == 0)
+            IList<CurveLoop> boundaries = filledRegion.GetBoundaries();
+
+            if (boundaries == null || boundaries.Count == 0)
             {
-                Debug.WriteLine("    [CreateSurface] ERROR: Boundary Loop is not valid (count=0)");
+                Debug.WriteLine("    [CreateSurface] ERROR: No boundaries found");
                 return null;
             }
-            Debug.WriteLine($"    [CreateSurface] Found {currentLoop.Count} boundary loops");
 
-            Plane regionPlane = currentLoop[0].GetPlane();
-            XYZ normal = regionPlane.Normal;
-            Debug.WriteLine($"    [CreateSurface] Region plane normal: ({normal.X:F3}, {normal.Y:F3}, {normal.Z:F3})");
+            Debug.WriteLine($"    [CreateSurface] Found {boundaries.Count} boundary loop(s)");
 
-            Transform moveBack = Transform.CreateTranslation(normal.Multiply(-offsetDistance));
-
-            IList<CurveLoop> startProfile = new List<CurveLoop>();
-
-            foreach (CurveLoop loop in currentLoop)
+            // Log info about the first boundary
+            if (boundaries.Count > 0)
             {
-                startProfile.Add(CurveLoop.CreateViaTransform(loop, moveBack));
+                CurveLoop firstLoop = boundaries[0];
+                Plane plane = firstLoop.GetPlane();
+                if (plane != null)
+                {
+                    Debug.WriteLine($"    [CreateSurface] Boundary plane origin: ({plane.Origin.X:F2}, {plane.Origin.Y:F2}, {plane.Origin.Z:F2})");
+                    Debug.WriteLine($"    [CreateSurface] Boundary plane normal: ({plane.Normal.X:F2}, {plane.Normal.Y:F2}, {plane.Normal.Z:F2})");
+                }
+
+                int curveCount = 0;
+                foreach (Curve c in firstLoop)
+                {
+                    curveCount++;
+                }
+                Debug.WriteLine($"    [CreateSurface] First loop has {curveCount} curves");
             }
-            Debug.WriteLine($"    [CreateSurface] Created {startProfile.Count} transformed curve loops");
 
-            double extrusionDist = Math.Abs(0.1 * offsetDistance);
-            if (extrusionDist < 0.001)
-            {
-                Debug.WriteLine($"    [CreateSurface] extrusionDist too small ({extrusionDist}), using minimum 0.001");
-                extrusionDist = 0.001; // Minimum extrusion distance
-            }
-            Debug.WriteLine($"    [CreateSurface] Creating extrusion with distance: {extrusionDist}");
-
-            Solid tempSolid = GeometryCreationUtilities.CreateExtrusionGeometry(startProfile, normal, extrusionDist);
-            Debug.WriteLine($"    [CreateSurface] Solid created with {tempSolid.Faces.Size} faces");
-
-            Face resultFace = tempSolid.Faces.get_Item(0) as Face;
-            Debug.WriteLine($"    [CreateSurface] GetFaceFromFilledRegion END - Face: {(resultFace != null ? "OK" : "NULL")}");
-
-            return resultFace;
+            Debug.WriteLine($"    [CreateSurface] GetBoundaryLoops END");
+            return boundaries;
         }
     }
 }

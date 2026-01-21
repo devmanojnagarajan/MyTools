@@ -1,4 +1,4 @@
-﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,7 +40,6 @@ namespace MyTools.Services
             Debug.WriteLine($"  Found {notes.Count} TextNotes in view");
 
             // 3. Collect Model Elements to check for clashes
-            // We optimize by only collecting elements matching the USER'S SELECTED CATEGORIES
             ElementMulticategoryFilter catFilter = new ElementMulticategoryFilter(selectedCategoryIds);
 
             List<Element> candidateElements = new FilteredElementCollector(doc, activePlanView.Id)
@@ -53,6 +52,14 @@ namespace MyTools.Services
             int viewsCreated = 0;
             int regionIndex = 0;
 
+            // Diagnostic counters
+            int skipNullBoundary = 0;
+            int skipNoTextNote = 0;
+            int skipNoQuotedName = 0;
+            int skipNoClash = 0;
+            List<string> textNotesFound = new List<string>();
+            List<string> viewNamesExtracted = new List<string>();
+
             // 4. Start Transaction for View Creation
             using (Transaction trans = new Transaction(doc, "Generate Isolated Views"))
             {
@@ -64,41 +71,45 @@ namespace MyTools.Services
                     regionIndex++;
                     Debug.WriteLine($"  --- Processing FilledRegion {regionIndex}/{regions.Count} (Id: {region.Id}) ---");
 
-                    // A. Create Projection Face
-                    Face regionFace = CreateSurface.GetFaceFromFilledRegion(region, 1.0); // Use 1.0 feet offset
-                    if (regionFace == null)
+                    // A. Get Boundary Curves from FilledRegion (simple 2D approach)
+                    IList<CurveLoop> regionBoundaries = CreateSurface.GetBoundaryLoops(region);
+                    if (regionBoundaries == null || regionBoundaries.Count == 0)
                     {
-                        Debug.WriteLine($"    SKIP: regionFace is null");
+                        Debug.WriteLine($"    SKIP: regionBoundaries is null or empty");
+                        skipNullBoundary++;
                         continue;
                     }
-                    Debug.WriteLine($"    regionFace created successfully");
+                    Debug.WriteLine($"    Boundaries retrieved successfully");
 
-                    // B. Find Associated TextNote
-                    TextNote labelNote = TextNoteClash.GetTextNoteInRegion(regionFace, notes);
+                    // B. Find Associated TextNote (2D point-in-polygon check)
+                    TextNote labelNote = TextNoteClash.GetTextNoteInRegion(regionBoundaries, notes);
                     if (labelNote == null)
                     {
                         Debug.WriteLine($"    SKIP: No TextNote found in region");
+                        skipNoTextNote++;
                         continue;
                     }
                     Debug.WriteLine($"    Found TextNote: '{labelNote.Text}'");
+                    textNotesFound.Add(labelNote.Text);
 
-                    // C. Slice Name from Quotes
-                    // Assuming you have this method in your StringUtils/ViewNameFromString class
+                    // C. Extract view name from quoted text
                     string viewName = ViewNameFromString.TitleText(labelNote.Text);
                     if (string.IsNullOrEmpty(viewName))
                     {
                         Debug.WriteLine($"    SKIP: viewName is empty (no quoted text found)");
+                        skipNoQuotedName++;
                         continue;
                     }
                     Debug.WriteLine($"    Extracted viewName: '{viewName}'");
+                    viewNamesExtracted.Add(viewName);
 
-                    // D. Check Clashes using your Face Projection Logic
-                    List<Element> clashingElements = CheckClash.getClashingElements(regionFace, candidateElements);
+                    // D. Check which elements are inside the region boundary
+                    List<Element> clashingElements = CheckClash.GetClashingElements(regionBoundaries, candidateElements);
                     Debug.WriteLine($"    Found {clashingElements.Count} clashing elements");
 
                     if (clashingElements.Count > 0)
                     {
-                        // E. Create the View using your IsolatedView Logic
+                        // E. Create the View
                         Debug.WriteLine($"    Creating isolated view '{viewName}'...");
                         CreateNewIsolated3DView.ViewCreate(templateView, clashingElements, viewName);
                         viewsCreated++;
@@ -107,6 +118,7 @@ namespace MyTools.Services
                     else
                     {
                         Debug.WriteLine($"    SKIP: No clashing elements found");
+                        skipNoClash++;
                     }
                 }
 
@@ -115,7 +127,25 @@ namespace MyTools.Services
             }
 
             Debug.WriteLine($"=== ViewGenerationService.GenerateViews END - Created {viewsCreated} views ===");
-            TaskDialog.Show("Process Complete", $"Successfully created {viewsCreated} views.");
+
+            // Build diagnostic message
+            string diagnosticMsg = $"=== DIAGNOSTIC REPORT ===\n\n" +
+                $"FilledRegions (hatches) found: {regions.Count}\n" +
+                $"TextNotes in view: {notes.Count}\n" +
+                $"Elements in selected categories: {candidateElements.Count}\n\n" +
+                $"=== SKIP REASONS ===\n" +
+                $"Boundary retrieval failed: {skipNullBoundary}\n" +
+                $"No TextNote in region: {skipNoTextNote}\n" +
+                $"No quoted name in text: {skipNoQuotedName}\n" +
+                $"No clashing elements: {skipNoClash}\n\n" +
+                $"=== TEXT NOTES FOUND IN REGIONS ===\n" +
+                (textNotesFound.Count > 0 ? string.Join("\n", textNotesFound) : "(none)") + "\n\n" +
+                $"=== VIEW NAMES EXTRACTED ===\n" +
+                (viewNamesExtracted.Count > 0 ? string.Join("\n", viewNamesExtracted) : "(none)") + "\n\n" +
+                $"=== RESULT ===\n" +
+                $"Views created: {viewsCreated}";
+
+            TaskDialog.Show("Process Complete", diagnosticMsg);
         }
     }
 }

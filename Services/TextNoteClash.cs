@@ -1,4 +1,4 @@
-﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.DB;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -6,29 +6,33 @@ namespace MyTools.Services
 {
     public class TextNoteClash
     {
-        public static TextNote GetTextNoteInRegion(Face filledRegionFace, List<TextNote> allNotes)
+        public static TextNote GetTextNoteInRegion(IList<CurveLoop> regionBoundaries, List<TextNote> allNotes)
         {
             Debug.WriteLine($"    [TextNoteClash] GetTextNoteInRegion START - checking {allNotes.Count} notes");
 
-            if (filledRegionFace == null)
+            if (regionBoundaries == null || regionBoundaries.Count == 0)
             {
-                Debug.WriteLine("    [TextNoteClash] ERROR: filledRegionFace is null");
+                Debug.WriteLine("    [TextNoteClash] ERROR: regionBoundaries is null or empty");
                 return null;
             }
 
+            int checkedCount = 0;
             foreach (TextNote note in allNotes)
             {
+                checkedCount++;
                 XYZ notePoint = note.Coord;
-                Debug.WriteLine($"    [TextNoteClash] Checking note '{note.Text.Substring(0, System.Math.Min(20, note.Text.Length))}...' at ({notePoint.X:F2}, {notePoint.Y:F2}, {notePoint.Z:F2})");
+                string shortText = note.Text.Length > 30 ? note.Text.Substring(0, 30) + "..." : note.Text;
 
-                if (FaceProjectionHelper.IsPointOnFace(filledRegionFace, notePoint))
+                Debug.WriteLine($"    [TextNoteClash] Checking note {checkedCount}/{allNotes.Count}: '{shortText}' at ({notePoint.X:F2}, {notePoint.Y:F2})");
+
+                if (FaceProjectionHelper.IsPointInsideBoundary(regionBoundaries, notePoint))
                 {
-                    Debug.WriteLine($"    [TextNoteClash] FOUND: TextNote '{note.Text}' is inside region");
+                    Debug.WriteLine($"    [TextNoteClash] FOUND: TextNote '{shortText}' is inside region");
                     return note;
                 }
             }
 
-            Debug.WriteLine("    [TextNoteClash] GetTextNoteInRegion END - No matching note found");
+            Debug.WriteLine($"    [TextNoteClash] GetTextNoteInRegion END - No matching note found");
             return null;
         }
     }
