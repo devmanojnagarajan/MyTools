@@ -44,11 +44,29 @@ namespace MyTools.Services
             List<ElementId> targetIds = elementsToIsolate.Select(e => e.Id).ToList();
             Debug.WriteLine($"      [CreateNewIsolated3DView] Elements to keep visible: {targetIds.Count}");
 
-            // Filter out the IDs we want to KEEP
-            List<ElementId> idsToHide = allElementIdsInView
-                .Where(id => !targetIds.Contains(id))
-                .ToList();
-            Debug.WriteLine($"      [CreateNewIsolated3DView] Elements to hide: {idsToHide.Count}");
+            // Filter out the IDs we want to KEEP, and only include elements that CAN be hidden
+            List<ElementId> idsToHide = new List<ElementId>();
+            int cannotHideCount = 0;
+
+            foreach (ElementId id in allElementIdsInView)
+            {
+                // Skip elements we want to keep
+                if (targetIds.Contains(id))
+                    continue;
+
+                // Check if element can be hidden in this view
+                Element el = doc.GetElement(id);
+                if (el != null && el.CanBeHidden(isolatedView))
+                {
+                    idsToHide.Add(id);
+                }
+                else
+                {
+                    cannotHideCount++;
+                }
+            }
+
+            Debug.WriteLine($"      [CreateNewIsolated3DView] Elements to hide: {idsToHide.Count}, Cannot hide: {cannotHideCount}");
 
             if (idsToHide.Any())
             {
