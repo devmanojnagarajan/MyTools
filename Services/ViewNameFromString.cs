@@ -1,16 +1,23 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 namespace MyTools.Services
 {
-    public class ViewNameFromString
+    /// <summary>
+    /// Extracts view names from text content.
+    /// </summary>
+    public static class ViewNameFromString
     {
+        private static readonly Regex QuotedTextPattern = new Regex("\"([^\"]*)\"", RegexOptions.Compiled);
+
+        /// <summary>
+        /// Extracts the first quoted text from the input string.
+        /// </summary>
         public static string TitleText(string input)
         {
-            if (string.IsNullOrEmpty(input)) return string.Empty;
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
 
-            // This regex captures the content between the first set of double quotes
-            Match match = Regex.Match(input, "\"([^\"]*)\"");
-
+            Match match = QuotedTextPattern.Match(input);
             return match.Success ? match.Groups[1].Value : string.Empty;
         }
     }

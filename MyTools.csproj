@@ -11,7 +11,12 @@
     <StartProgram>C:\Program Files\Autodesk\Revit 2024\Revit.exe</StartProgram>
     <!-- Revit Addin Output Folder - SINGLE SOURCE OF TRUTH -->
     <RevitAddinFolder>C:\Users\Manoj\AppData\Roaming\Autodesk\Revit\Addins\2024</RevitAddinFolder>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="RevitAPI">
@@ -44,6 +49,10 @@
     <!-- Copy DLL -->
     <Copy SourceFiles="$(TargetDir)MyTools.dll" DestinationFolder="$(RevitAddinFolder)" />
     <Message Importance="High" Text="Copied: MyTools.dll" />
+
+    <!-- Copy Newtonsoft.Json.dll -->
+    <Copy SourceFiles="$(TargetDir)Newtonsoft.Json.dll" DestinationFolder="$(RevitAddinFolder)" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
+    <Message Importance="High" Text="Copied: Newtonsoft.Json.dll" Condition="Exists('$(TargetDir)Newtonsoft.Json.dll')" />
 
     <!-- Copy PDB for debugging -->
     <Copy SourceFiles="$(TargetDir)MyTools.pdb" DestinationFolder="$(RevitAddinFolder)" Condition="Exists('$(TargetDir)MyTools.pdb')" />
